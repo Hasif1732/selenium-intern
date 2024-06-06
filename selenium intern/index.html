@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Selenium Script Runner</title>
+</head>
+<body>
+  <h1>Selenium Script Runner</h1>
+  <a href="#" id="run-link">Click here to run the script.</a>
+  <div id="results"></div>
+
+  <script>
+    const link = document.getElementById("run-link");
+    const resultsDiv = document.getElementById("results");
+  
+    link.addEventListener("click", async () => {
+      try {
+        const response = await fetch("http://localhost:5000/run_selenium_script", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
+  
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+  
+        const results = await response.json();
+  
+        // Display the results
+        const endTime = new Date(results.end_time);
+        const ipAddress = results.ip_address;
+        const trends = [
+          `Name of trend1: ${results.trend1}`,
+          `Name of trend2: ${results.trend2}`,
+          `Name of trend3: ${results.trend3}`,
+          `Name of trend4: ${results.trend4}`,
+          `Name of trend5: ${results.trend5}`
+        ].join("<br>");
+  
+        resultsDiv.innerHTML = `
+          <p>These are the most happening topics as on ${endTime.toLocaleString()}.</p>
+          <p>${trends}</p>
+          <p>The IP address used for this query was ${ipAddress}.</p>
+          <p>Here's a JSON extract of this record from the MongoDB:</p>
+          <pre>${JSON.stringify(results, null, 2)}</pre>
+          <p><a href="#" id="run-link">Click here to run the query again.</a></p>
+        `;
+      } catch (error) {
+        console.error(error);
+        resultsDiv.innerHTML = `<p>Error: ${error.message}</p>`;
+      }
+    });
+  </script>
+</body>
+</html>
